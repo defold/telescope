@@ -13,6 +13,12 @@ local getfenv = _G.getfenv or compat_env.getfenv
 local setfenv = _G.setfenv or compat_env.setfenv
 local unpack = _G.unpack or table.unpack
 
+local color_red = string.char(27) .. '[0;31m'
+local color_blue = string.char(27) .. '[0;34m'
+local color_green = string.char(27) .. '[0;32m'
+local color_yellow = string.char(27) .. '[0;33m'
+local color_grey = string.char(27) .. '[0;37m'
+local color_none = string.char(27) .. '[0;0m'
 
 local _VERSION = "0.6.2"
 
@@ -51,6 +57,14 @@ local status_labels = {
   [status_codes.pass]        = 'P',
   [status_codes.pending]     = '?',
   [status_codes.unassertive] = 'U'
+}
+
+local status_colors = {
+  [status_codes.err]         = color_red,
+  [status_codes.fail]        = color_red,
+  [status_codes.pass]        = color_green,
+  [status_codes.pending]     = color_blue,
+  [status_codes.unassertive] = color_yellow
 }
 
 --- The default names for context blocks. It defaults to "context", "spec" and
@@ -483,8 +497,9 @@ end
 --- Return a detailed report for each context, with the status of each test.
 -- @param contexts The contexts returned by <tt>load_contexts</tt>.
 -- @param results The results returned by <tt>run</tt>.
+-- @param use_color Add console colors to report
 -- @function test_report
-local function test_report(contexts, results)
+local function test_report(contexts, results, use_color)
 
   local buffer               = {}
   local leading_space        = "  "
@@ -492,7 +507,7 @@ local function test_report(contexts, results)
   local line_char            = "-"
   local previous_level       = 0
   local status_format_len    = 3
-  local status_format        = "[%s]"
+  local status_format        = "[%s%s%s]"
   local width                = 72
   local context_name_format  = "%-" .. width - status_format_len .. "s"
   local function_name_format = "%-" .. width - status_format_len .. "s"
@@ -515,8 +530,9 @@ local function test_report(contexts, results)
     if item.context then
       table.insert(buffer, context_name_format:format(space() .. name .. ':'))
     elseif results[i] then
+      local color = use_color and status_colors[results[i].status_code] or ""
       table.insert(buffer, function_name_format:format(space() .. name) ..
-        status_format:format(results[i].status_label))
+        status_format:format(color, results[i].status_label, (use_color and color_none or "")))
     end
   end
   add_divider()
@@ -546,35 +562,37 @@ end
 -- <tt>pending</tt>, <tt>tests</tt>, <tt>unassertive</tt>.
 -- @param contexts The contexts returned by <tt>load_contexts</tt>.
 -- @param results The results returned by <tt>run</tt>.
+-- @param use_color Add console colors to report
 -- @function summary_report
-local function summary_report(contexts, results)
+local function summary_report(contexts, results, use_color)
   local r = {
-    assertions  = 0,
-    errors      = 0,
-    failed      = 0,
-    passed      = 0,
-    pending     = 0,
-    tests       = 0,
-    unassertive = 0
+    assertions  = { count = 0, color = color_none },
+    errors      = { count = 0, color = status_colors[status_codes.err] },
+    failed      = { count = 0, color = status_colors[status_codes.fail] },
+    passed      = { count = 0, color = status_colors[status_codes.pass] },
+    pending     = { count = 0, color = status_colors[status_codes.pending] },
+    tests       = { count = 0, color = color_none },
+    unassertive = { count = 0, color = status_colors[status_codes.unassertive] },
   }
   for _, v in pairs(results) do
-    r.tests = r.tests + 1
-    r.assertions = r.assertions + v.assertions_invoked
-    if v.status_code == status_codes.err then r.errors = r.errors + 1
-    elseif v.status_code == status_codes.fail then r.failed = r.failed + 1
-    elseif v.status_code == status_codes.pass then r.passed = r.passed + 1
-    elseif v.status_code == status_codes.pending then r.pending = r.pending + 1
-    elseif v.status_code == status_codes.unassertive then r.unassertive = r.unassertive + 1
+    r.tests.count = r.tests.count + 1
+    r.assertions.count = r.assertions.count + v.assertions_invoked
+    if v.status_code == status_codes.err then r.errors.count = r.errors.count + 1
+    elseif v.status_code == status_codes.fail then r.failed.count = r.failed.count + 1
+    elseif v.status_code == status_codes.pass then r.passed.count = r.passed.count + 1
+    elseif v.status_code == status_codes.pending then r.pending.count = r.pending.count + 1
+    elseif v.status_code == status_codes.unassertive then r.unassertive.count = r.unassertive.count + 1
     end
   end
   local buffer = {}
   for _, k in ipairs({"tests", "passed", "assertions", "failed", "errors", "unassertive", "pending"}) do
-    local number = r[k]
+    local number = r[k].count
     local label = k
+    local color = use_color and r[k].color or ""
     if number == 1 then
       label = label:gsub("s$", "")
     end
-    table.insert(buffer, ("%d %s"):format(number, label))
+    table.insert(buffer, ("%s%d %s%s"):format(color, number, label, use_color and color_none or ""))
   end
   return table.concat(buffer, " "), r
 end
