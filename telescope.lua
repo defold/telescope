@@ -1,8 +1,8 @@
 --- Telescope is a test library for Lua that allows for flexible, declarative
 -- tests. The documentation produced here is intended largely for developers
 -- working on Telescope.  For information on using Telescope, please visit the
--- project homepage at: <a href="http://github.com/norman/telescope">http://github.com/norman/telescope#readme</a>.
--- @release 0.6.1
+-- project homepage at: <a href="http://github.com/defold/telescope">http://github.com/defold/telescope#readme</a>.
+-- @release 0.6.2
 -- @class module
 -- @module 'telescope'
 local _M = {}
@@ -14,7 +14,7 @@ local setfenv = _G.setfenv or compat_env.setfenv
 local unpack = _G.unpack or table.unpack
 
 
-local _VERSION = "0.6.1"
+local _VERSION = "0.6.2"
 
 --- The status codes that can be returned by an invoked test. These should not be overidden.
 -- @name status_codes
@@ -164,7 +164,7 @@ local function make_assertion(name, message, func)
           error(string.format('assert_%s expected %d arguments but got %d', name, num_vars, #args))
         end
       end
-      for i = 1, nargs do a[i] = tostring(v) end
+      for i = 1, nargs do a[i] = tostring(args[i]) end
       for i = nargs+1, num_vars do a[i] = 'nil' end
       return (assertion_message_prefix .. message):format(unpack(a))
     end
