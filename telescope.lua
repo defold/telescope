@@ -2,7 +2,7 @@
 -- tests. The documentation produced here is intended largely for developers
 -- working on Telescope.  For information on using Telescope, please visit the
 -- project homepage at: <a href="http://github.com/norman/telescope">http://github.com/norman/telescope#readme</a>.
--- @release 0.6
+-- @release 0.6.1
 -- @class module
 -- @module 'telescope'
 local _M = {}
@@ -11,9 +11,10 @@ local compat_env = require 'telescope.compat_env'
 
 local getfenv = _G.getfenv or compat_env.getfenv
 local setfenv = _G.setfenv or compat_env.setfenv
+local unpack = _G.unpack or table.unpack
 
 
-local _VERSION = "0.6.0"
+local _VERSION = "0.6.1"
 
 --- The status codes that can be returned by an invoked test. These should not be overidden.
 -- @name status_codes

@@ -5,7 +5,7 @@ declarative tests with nested contexts.
 
 ## Features
 
-* Compatible with Lua 5.1 and 5.2.
+* Compatible with Lua 5.1 and above.
 * Nestable test contexts/descriptions.
 * [BDD](http://en.wikipedia.org/wiki/Behavior_Driven_Development)-style spec names.
 * Before/after functions per context.
@@ -158,7 +158,10 @@ You can see all the available command-line options, and some examples by running
 
 [Norman Clarke](mailto:norman@njclarke.com)
 
-Please feel free to email me bug reports or feature requests.
+### Contributors
+
+* [Björn Ritzl](https://github.com/britzl/)
+
 
 ## Acknowledgements
 
